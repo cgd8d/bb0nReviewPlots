@@ -1,0 +1,8 @@
+Script for converting Carter's google spreadsheet into
+publication-quality plots compiling bb0n experiment information.
+
+To create plots, you must:
+* Export Carter's spreadsheet in tab-delimited format.  (Comma-delimited format can be accepted with a small modification to MakeReviewPlots.py, but is not ideal because Carter's notes include commas.)
+* Run:
+  python MakeReviewPlots.py <name of tab-delimited file>
+* The output plots will be created in the working directory where you ran the script.
