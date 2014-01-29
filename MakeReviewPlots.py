@@ -84,18 +84,20 @@ def DrawGraph(title, xvarlabel, yvarlabel, datapoints, legend_pos, image_name):
         gr = ROOT.TGraph(gr_size)
         for point in range(gr_size):
             gr.SetPoint(point, datapoints[isotope][point][0], datapoints[isotope][point][1])
+        gr.SetMarkerStyle(ROOT.kFullCircle)
         gr.SetMarkerColor(Colors[isotope])
-        gr.SetLineColor(Colors[isotope])
-        gr.SetFillColor(Colors[isotope])
+        gr.SetLineColor(ROOT.kWhite)
+        gr.SetFillColor(ROOT.kWhite)
         dict_of_graphs[isotope] = gr
     multigraph = ROOT.TMultiGraph()
-    for gr in dict_of_graphs.itervalues(): multigraph.Add(gr, "p*")
+    for gr in dict_of_graphs.itervalues(): multigraph.Add(gr, "p")
     multigraph.SetTitle(title)
     multigraph.Draw("a")
     multigraph.GetXaxis().SetTitle(xvarlabel)
     multigraph.GetYaxis().SetTitle(yvarlabel)
     legend = ROOT.TLegend(*legend_pos)
     for isotope in dict_of_graphs: legend.AddEntry(dict_of_graphs[isotope], isotope)
+    legend.SetFillColor(ROOT.kWhite)
     legend.Draw()
     c.SaveAs(image_name)
 
