@@ -23,6 +23,21 @@ Colors = {
     '96Zr' : ROOT.kPink,
     '48Ca' : ROOT.kYellow,
 }
+MonthToYear = {
+    'Jan' : 0./12,
+    'Feb' : 1./12,
+    'Mar' : 2./12,
+    'Apr' : 3./12,
+    'May' : 4./12,
+    'Jun' : 5./12,
+    'Jul' : 6./12,
+    'Aug' : 7./12,
+    'Sep' : 8./12,
+    'Oct' : 9./12,
+    'Nov' : 10./12,
+    'Dec' : 11./12,
+    ''    : 0./12, # Unfilled months are treated like January
+}
 
 # Hard-code the various plots we make.
 # Each is a dictionary where keys are the desired isotopes; we need to initialize them
@@ -41,19 +56,18 @@ exposure_vs_year = { # dict from isotope to a list of exposure-year pairs.
 with open(sys.argv[1], 'rb') as csvfile:
     reader = csv.DictReader(csvfile, dialect = delimiter_dialect)
     for row in reader:
+        PublicationTime = float(row['year']) + MonthToYear[row['month']]
 
         # halflife_vs_year
         if (row['Isotope'] in halflife_vs_year and
-            row['T_{1/2} limit (yrs)'] != '' and
-            row['year'] != ''):
-            halflife_vs_year[row['Isotope']].append((float(row['year']),
+            row['T_{1/2} limit (yrs)'] != ''):
+            halflife_vs_year[row['Isotope']].append((PublicationTime,
                                                      float(row['T_{1/2} limit (yrs)'])))
 
         # exposure_vs_year
         if (row['Isotope'] in exposure_vs_year and
-            row['Exposure (mol-yrs)'] != '' and
-            row['year'] != ''):
-            exposure_vs_year[row['Isotope']].append((float(row['year']),
+            row['Exposure (mol-yrs)'] != ''):
+            exposure_vs_year[row['Isotope']].append((PublicationTime,
                                                      float(row['Exposure (mol-yrs)'])))
 
 c = ROOT.TCanvas()
