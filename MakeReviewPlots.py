@@ -52,6 +52,11 @@ exposure_vs_year = { # dict from isotope to a list of year-exposure pairs.
     '76Ge' : [],
     '130Te' : [],
 }
+halflife_vs_exposure = { # dict from isotope to a list of exposure-T1/2 pairs.
+    '136Xe' : [],
+    '76Ge' : [],
+    '130Te' : [],
+}
 
 with open(sys.argv[1], 'rb') as csvfile:
     reader = csv.DictReader(csvfile, dialect = delimiter_dialect)
@@ -69,6 +74,13 @@ with open(sys.argv[1], 'rb') as csvfile:
             row['Exposure (mol-yrs)'] != ''):
             exposure_vs_year[row['Isotope']].append((PublicationTime,
                                                      float(row['Exposure (mol-yrs)'])))
+
+        # halflife_vs_exposure
+        if (row['Isotope'] in halflife_vs_exposure and
+            row['T_{1/2} limit (yrs)'] != '' and
+            row['Exposure (mol-yrs)'] != ''):
+            halflife_vs_exposure[row['Isotope']].append((float(row['Exposure (mol-yrs)']),
+                                                         float(row['T_{1/2} limit (yrs)'])))
 
 c = ROOT.TCanvas()
 
@@ -118,3 +130,10 @@ DrawGraph("Exposure vs Publication Year",
           (0.7, 0.1, 0.9, 0.3),
           "exposure_vs_year.eps",
           yrange = (1.e-1, 4.e3))
+
+DrawGraph("Halflife vs Exposure",
+          "Exposure (mol-years)",
+          "T_{1/2} Limit (years)",
+          halflife_vs_exposure,
+          (0.7, 0.1, 0.9, 0.3),
+          "halflife_vs_exposure.eps")
