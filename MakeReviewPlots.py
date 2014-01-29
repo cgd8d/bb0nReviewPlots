@@ -75,7 +75,8 @@ c = ROOT.TCanvas()
 # Define one style of plot -- a scatter plot of yvar vs xvar,
 # color-coded for the different isotopes.
 # So, datapoints is a map from isotope to a list of xy-points.
-def DrawGraph(title, xvarlabel, yvarlabel, datapoints, legend_pos, image_name):
+def DrawGraph(title, xvarlabel, yvarlabel, datapoints, legend_pos, image_name,
+              yrange = None):
     c.SetLogy()
     c.SetGridy()
     dict_of_graphs = {}
@@ -95,6 +96,7 @@ def DrawGraph(title, xvarlabel, yvarlabel, datapoints, legend_pos, image_name):
     multigraph.Draw("a")
     multigraph.GetXaxis().SetTitle(xvarlabel)
     multigraph.GetYaxis().SetTitle(yvarlabel)
+    if yrange != None: multigraph.GetYaxis().SetRangeUser(*yrange)
     legend = ROOT.TLegend(*legend_pos)
     for isotope in dict_of_graphs: legend.AddEntry(dict_of_graphs[isotope], isotope)
     legend.SetFillColor(ROOT.kWhite)
@@ -106,11 +108,13 @@ DrawGraph("Halflife vs Publication Year",
           "T_{1/2} Limit (years)",
           halflife_vs_year,
           (0.1, 0.7, 0.3, 0.9),
-          "halflife_vs_year.eps")
+          "halflife_vs_year.eps",
+          yrange = (1.e20, 4.e26))
 
 DrawGraph("Exposure vs Publication Year",
           "Publication Year",
           "Exposure (mol-years)",
           exposure_vs_year,
           (0.7, 0.1, 0.9, 0.3),
-          "exposure_vs_year.eps")
+          "exposure_vs_year.eps",
+          yrange = (1.e-1, 4.e3))
