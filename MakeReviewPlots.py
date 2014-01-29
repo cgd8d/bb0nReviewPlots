@@ -88,8 +88,9 @@ c = ROOT.TCanvas()
 # color-coded for the different isotopes.
 # So, datapoints is a map from isotope to a list of xy-points.
 def DrawGraph(title, xvarlabel, yvarlabel, datapoints, legend_pos, image_name,
-              yrange = None):
-    c.SetLogy()
+              yrange = None, xtype = 'Lin', ytype = 'Log'):
+    if xtype == 'Log': c.SetLogx()
+    if ytype == 'Log': c.SetLogy()
     c.SetGridy()
     dict_of_graphs = {}
     for isotope in datapoints:
@@ -135,5 +136,6 @@ DrawGraph("Halflife vs Exposure",
           "Exposure (mol-years)",
           "T_{1/2} Limit (years)",
           halflife_vs_exposure,
-          (0.7, 0.1, 0.9, 0.3),
-          "halflife_vs_exposure.eps")
+          (0.1, 0.7, 0.3, 0.9),
+          "halflife_vs_exposure.eps",
+          xtype = 'Log')
