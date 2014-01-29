@@ -42,12 +42,12 @@ MonthToYear = {
 # Hard-code the various plots we make.
 # Each is a dictionary where keys are the desired isotopes; we need to initialize them
 # to contain the desired isotopes (since generally we may not want to show all isotopes together).
-halflife_vs_year = { # dict from isotope to a list of T1/2-year pairs.
+halflife_vs_year = { # dict from isotope to a list of year-T1/2 pairs.
     '136Xe' : [],
     '76Ge' : [],
     '130Te' : [],
 }
-exposure_vs_year = { # dict from isotope to a list of exposure-year pairs.
+exposure_vs_year = { # dict from isotope to a list of year-exposure pairs.
     '136Xe' : [],
     '76Ge' : [],
     '130Te' : [],
