@@ -44,44 +44,47 @@ MonthToYear = {
 # Each is a dictionary where keys are the desired isotopes; we need to initialize them
 # to contain the desired isotopes (since generally we may not want to show all isotopes together).
 halflife_vs_year = { # dict from isotope to a list of year-T1/2 pairs.
-    '136Xe' : [],
-    '76Ge' : [],
-    '130Te' : [],
+    '136Xe' : [], '136Xe_still_running' : [],
+    '76Ge' : [], '76Ge_still_running' : [],
+    '130Te' : [], '130Te_still_running' : [],
 }
 exposure_vs_year = { # dict from isotope to a list of year-exposure pairs.
-    '136Xe' : [],
-    '76Ge' : [],
-    '130Te' : [],
+    '136Xe' : [], '136Xe_still_running' : [],
+    '76Ge' : [], '76Ge_still_running' : [],
+    '130Te' : [], '130Te_still_running' : [],
 }
 halflife_vs_exposure = { # dict from isotope to a list of exposure-T1/2 pairs.
-    '136Xe' : [],
-    '76Ge' : [],
-    '130Te' : [],
+    '136Xe' : [], '136Xe_still_running' : [],
+    '76Ge' : [], '76Ge_still_running' : [],
+    '130Te' : [], '130Te_still_running' : [],
 }
 
 with open(sys.argv[1], 'rb') as csvfile:
     reader = csv.DictReader(csvfile, dialect = delimiter_dialect)
     for row in reader:
         PublicationTime = float(row['year']) + MonthToYear[row['month']]
+        isotope = row['Isotope']
+        if row['Still running?'] == 'Y':
+            isotope += '_still_running'
 
         # halflife_vs_year
         if (row['Isotope'] in halflife_vs_year and
             row['T_{1/2} limit (yrs)'] != ''):
-            halflife_vs_year[row['Isotope']].append((PublicationTime,
-                                                     float(row['T_{1/2} limit (yrs)'])))
+            halflife_vs_year[isotope].append((PublicationTime,
+                                              float(row['T_{1/2} limit (yrs)'])))
 
         # exposure_vs_year
         if (row['Isotope'] in exposure_vs_year and
             row['Exposure (mol-yrs)'] != ''):
-            exposure_vs_year[row['Isotope']].append((PublicationTime,
-                                                     float(row['Exposure (mol-yrs)'])))
+            exposure_vs_year[isotope].append((PublicationTime,
+                                              float(row['Exposure (mol-yrs)'])))
 
         # halflife_vs_exposure
         if (row['Isotope'] in halflife_vs_exposure and
             row['T_{1/2} limit (yrs)'] != '' and
             row['Exposure (mol-yrs)'] != ''):
-            halflife_vs_exposure[row['Isotope']].append((float(row['Exposure (mol-yrs)']),
-                                                         float(row['T_{1/2} limit (yrs)'])))
+            halflife_vs_exposure[isotope].append((float(row['Exposure (mol-yrs)']),
+                                                  float(row['T_{1/2} limit (yrs)'])))
 
 c = ROOT.TCanvas()
 
@@ -108,16 +111,25 @@ def DrawGraph(xvarlabel, yvarlabel, datapoints, legend_pos, image_name,
     if ytype == 'Log': c.SetLogy()
     c.SetGridy()
     dict_of_graphs = {}
+    legend = ROOT.TLegend(*legend_pos)
     for isotope in datapoints:
+        isotope_name = isotope
+        still_running = False
+        if len(isotope) >= 14 and isotope[-14:] == '_still_running':
+            still_running = True
+            isotope_name = isotope[:-14]
         gr_size = len(datapoints[isotope])
+        if gr_size == 0: continue
         gr = ROOT.TGraph(gr_size)
         for point in range(gr_size):
             gr.SetPoint(point, datapoints[isotope][point][0], datapoints[isotope][point][1])
-        gr.SetMarkerStyle(ROOT.kFullCircle)
-        gr.SetMarkerColor(Colors[isotope])
+        if still_running: gr.SetMarkerStyle(ROOT.kOpenCircle)
+        else: gr.SetMarkerStyle(ROOT.kFullCircle)
+        gr.SetMarkerColor(Colors[isotope_name])
         gr.SetLineColor(ROOT.kWhite)
         gr.SetFillColor(ROOT.kWhite)
         dict_of_graphs[isotope] = gr
+        if not still_running: legend.AddEntry(dict_of_graphs[isotope], PrettyIsotope(isotope_name))
     multigraph = ROOT.TMultiGraph()
     for gr in dict_of_graphs.itervalues(): multigraph.Add(gr, "p")
     multigraph.Draw("a")
@@ -133,8 +145,6 @@ def DrawGraph(xvarlabel, yvarlabel, datapoints, legend_pos, image_name,
     multigraph.GetYaxis().SetTitleFont(12)
     if xaxisrange != None: multigraph.GetXaxis().SetLimits(*xaxisrange)
     if yaxisrange != None: multigraph.GetYaxis().SetRangeUser(*yaxisrange)
-    legend = ROOT.TLegend(*legend_pos)
-    for isotope in dict_of_graphs: legend.AddEntry(dict_of_graphs[isotope], PrettyIsotope(isotope))
     legend.SetFillColor(ROOT.kWhite)
     legend.SetBorderSize(0)
     legend.SetTextFont(12)
