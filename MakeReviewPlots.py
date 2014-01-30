@@ -1,6 +1,7 @@
 import csv
 import sys
 import os.path
+import string
 import ROOT
 ROOT.gROOT.SetBatch()
 
@@ -84,6 +85,17 @@ with open(sys.argv[1], 'rb') as csvfile:
 
 c = ROOT.TCanvas()
 
+# Make "white" be transparent (only works for pdf, svg, a few others but not eps).
+ROOT.gROOT.GetColor(ROOT.kWhite).SetAlpha(0)
+
+# Transform the isotope into a pretty Latex format.
+# I assume that the isotope input is in a form like 136Xe.
+def PrettyIsotope(isotope):
+    firstletter = 0
+    while firstletter < len(isotope) and isotope[firstletter] not in string.ascii_letters:
+        firstletter += 1
+    return '^{' + isotope[:firstletter] + '}' + isotope[firstletter:]
+
 # Define one style of plot -- a scatter plot of yvar vs xvar,
 # color-coded for the different isotopes.
 # So, datapoints is a map from isotope to a list of xy-points.
@@ -111,8 +123,9 @@ def DrawGraph(title, xvarlabel, yvarlabel, datapoints, legend_pos, image_name,
     multigraph.GetYaxis().SetTitle(yvarlabel)
     if yrange != None: multigraph.GetYaxis().SetRangeUser(*yrange)
     legend = ROOT.TLegend(*legend_pos)
-    for isotope in dict_of_graphs: legend.AddEntry(dict_of_graphs[isotope], isotope)
+    for isotope in dict_of_graphs: legend.AddEntry(dict_of_graphs[isotope], PrettyIsotope(isotope))
     legend.SetFillColor(ROOT.kWhite)
+    legend.SetBorderSize(0)
     legend.Draw()
     c.SaveAs(image_name)
 
@@ -120,22 +133,22 @@ DrawGraph("Halflife vs Publication Year",
           "Publication Year",
           "T_{1/2} Limit (years)",
           halflife_vs_year,
-          (0.1, 0.7, 0.3, 0.9),
-          "halflife_vs_year.eps",
+          (0.2, 0.6, 0.4, 0.8),
+          "halflife_vs_year.pdf",
           yrange = (1.e20, 4.e26))
 
 DrawGraph("Exposure vs Publication Year",
           "Publication Year",
           "Exposure (mol-years)",
           exposure_vs_year,
-          (0.7, 0.1, 0.9, 0.3),
-          "exposure_vs_year.eps",
+          (0.7, 0.2, 0.9, 0.4),
           yrange = (1.e-1, 4.e3))
+          "exposure_vs_year.pdf",
 
 DrawGraph("Halflife vs Exposure",
           "Exposure (mol-years)",
           "T_{1/2} Limit (years)",
           halflife_vs_exposure,
-          (0.1, 0.7, 0.3, 0.9),
-          "halflife_vs_exposure.eps",
+          (0.2, 0.6, 0.4, 0.8),
+          "halflife_vs_exposure.pdf",
           xtype = 'Log')
