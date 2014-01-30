@@ -103,7 +103,7 @@ def PrettyIsotope(isotope):
 # color-coded for the different isotopes.
 # So, datapoints is a map from isotope to a list of xy-points.
 def DrawGraph(xvarlabel, yvarlabel, datapoints, legend_pos, image_name,
-              yrange = None, xtype = 'Lin', ytype = 'Log'):
+              xaxisrange = None, yaxisrange = None, xtype = 'Lin', ytype = 'Log'):
     if xtype == 'Log': c.SetLogx()
     if ytype == 'Log': c.SetLogy()
     c.SetGridy()
@@ -129,7 +129,8 @@ def DrawGraph(xvarlabel, yvarlabel, datapoints, legend_pos, image_name,
     multigraph.GetYaxis().CenterTitle()
     multigraph.GetXaxis().SetTitleOffset(1.1)
     multigraph.GetYaxis().SetTitleOffset(1.1)
-    if yrange != None: multigraph.GetYaxis().SetRangeUser(*yrange)
+    if xaxisrange != None: multigraph.GetXaxis().SetLimits(*xaxisrange)
+    if yaxisrange != None: multigraph.GetYaxis().SetRangeUser(*yaxisrange)
     legend = ROOT.TLegend(*legend_pos)
     for isotope in dict_of_graphs: legend.AddEntry(dict_of_graphs[isotope], PrettyIsotope(isotope))
     legend.SetFillColor(ROOT.kWhite)
@@ -142,18 +143,20 @@ DrawGraph("Publication Year",
           halflife_vs_year,
           (0.2, 0.6, 0.4, 0.8),
           "halflife_vs_year.pdf",
-          yrange = (1.e20, 4.e26))
+          yaxisrange = (1.e20, 4.e26))
 
 DrawGraph("Publication Year",
           "Exposure (mol-years)",
           exposure_vs_year,
           (0.7, 0.2, 0.9, 0.4),
-          yrange = (1.e-1, 4.e3))
           "exposure_vs_year.pdf",
+          yaxisrange = (1.e-1, 4.e3))
 
 DrawGraph("Exposure (mol-years)",
           "T_{1/2} Limit (years)",
           halflife_vs_exposure,
           (0.2, 0.6, 0.4, 0.8),
           "halflife_vs_exposure.pdf",
+          xaxisrange = (3e-1, 1e3),
+          yaxisrange = (1e22, 1e26),
           xtype = 'Log')
