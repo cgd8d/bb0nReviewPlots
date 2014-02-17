@@ -59,6 +59,8 @@ halflife_vs_exposure = { # dict from isotope to a list of exposure-T1/2 pairs.
     '130Te' : [], '130Te_still_running' : [],
 }
 
+ListOfIsotopes = {} # Make a list of the best limits for every isotope.
+
 with open(sys.argv[1], 'rb') as csvfile:
     reader = csv.DictReader(csvfile, dialect = delimiter_dialect)
     for row in reader:
@@ -86,6 +88,14 @@ with open(sys.argv[1], 'rb') as csvfile:
                 row['Exposure (mol-yrs)'] != ''):
                 halflife_vs_exposure[isotope].append((float(row['Exposure (mol-yrs)']),
                                                       float(row['T_{1/2} limit (yrs)'])))
+
+            # Accumulate list of top limits
+            if (row['Isotope'] not in ListOfIsotopes or
+                ListOfIsotopes[row['Isotope']][0] < float(row['T_{1/2} limit (yrs)'])):
+                ListOfIsotopes[row['Isotope']] = (float(row['T_{1/2} limit (yrs)']),
+                                                  row['Collaboration'],
+                                                  row['year'],
+                                                  row['C.L. (%)'])
 
         except ValueError:
             print "Could not convert values in one row; skipping."
@@ -177,3 +187,11 @@ DrawGraph("Exposure (mol-years)",
           xaxisrange = (3e-1, 1e3),
           yaxisrange = (1e22, 1e26),
           xtype = 'Log')
+
+print "The best limits obtained are:"
+for key in ListOfIsotopes:
+    print "%s: %.1e, %s %s (CL %s)" % (key,
+                                       ListOfIsotopes[key][0],
+                                       ListOfIsotopes[key][1],
+                                       ListOfIsotopes[key][2],
+                                       ListOfIsotopes[key][3])
