@@ -62,29 +62,33 @@ halflife_vs_exposure = { # dict from isotope to a list of exposure-T1/2 pairs.
 with open(sys.argv[1], 'rb') as csvfile:
     reader = csv.DictReader(csvfile, dialect = delimiter_dialect)
     for row in reader:
-        PublicationTime = float(row['year']) + MonthToYear[row['month']]
-        isotope = row['Isotope']
-        if row['Still running?'] == 'Y':
-            isotope += '_still_running'
+        try:
+            PublicationTime = float(row['year']) + MonthToYear[row['month']]
+            isotope = row['Isotope']
+            if row['Still running?'] == 'Y':
+                isotope += '_still_running'
 
-        # halflife_vs_year
-        if (row['Isotope'] in halflife_vs_year and
-            row['T_{1/2} limit (yrs)'] != ''):
-            halflife_vs_year[isotope].append((PublicationTime,
-                                              float(row['T_{1/2} limit (yrs)'])))
-
-        # exposure_vs_year
-        if (row['Isotope'] in exposure_vs_year and
-            row['Exposure (mol-yrs)'] != ''):
-            exposure_vs_year[isotope].append((PublicationTime,
-                                              float(row['Exposure (mol-yrs)'])))
-
-        # halflife_vs_exposure
-        if (row['Isotope'] in halflife_vs_exposure and
-            row['T_{1/2} limit (yrs)'] != '' and
-            row['Exposure (mol-yrs)'] != ''):
-            halflife_vs_exposure[isotope].append((float(row['Exposure (mol-yrs)']),
+            # halflife_vs_year
+            if (row['Isotope'] in halflife_vs_year and
+                row['T_{1/2} limit (yrs)'] != ''):
+                halflife_vs_year[isotope].append((PublicationTime,
                                                   float(row['T_{1/2} limit (yrs)'])))
+
+            # exposure_vs_year
+            if (row['Isotope'] in exposure_vs_year and
+                row['Exposure (mol-yrs)'] != ''):
+                exposure_vs_year[isotope].append((PublicationTime,
+                                                  float(row['Exposure (mol-yrs)'])))
+
+            # halflife_vs_exposure
+            if (row['Isotope'] in halflife_vs_exposure and
+                row['T_{1/2} limit (yrs)'] != '' and
+                row['Exposure (mol-yrs)'] != ''):
+                halflife_vs_exposure[isotope].append((float(row['Exposure (mol-yrs)']),
+                                                      float(row['T_{1/2} limit (yrs)'])))
+
+        except ValueError:
+            print "Could not convert values in one row; skipping."
 
 c = ROOT.TCanvas()
 
