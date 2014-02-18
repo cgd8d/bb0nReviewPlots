@@ -58,6 +58,21 @@ halflife_vs_exposure = { # dict from isotope to a list of exposure-T1/2 pairs.
     '76Ge' : [], '76Ge_still_running' : [],
     '130Te' : [], '130Te_still_running' : [],
 }
+mbb_vs_year_rqrpa = { # dict from isotope to a list of year_mass pairs.
+    '136Xe' : [], '136Xe_still_running' : [],
+    '76Ge' : [], '76Ge_still_running' : [],
+    '130Te' : [], '130Te_still_running' : [],
+}
+mbb_vs_year_ibm2 = { # dict from isotope to a list of year_mass pairs.
+    '136Xe' : [], '136Xe_still_running' : [],
+    '76Ge' : [], '76Ge_still_running' : [],
+    '130Te' : [], '130Te_still_running' : [],
+}
+mbb_vs_year_shell = { # dict from isotope to a list of year_mass pairs.
+    '136Xe' : [], '136Xe_still_running' : [],
+    '76Ge' : [], '76Ge_still_running' : [],
+    '130Te' : [], '130Te_still_running' : [],
+}
 
 ListOfIsotopes = {} # Make a list of the best limits for every isotope.
 
@@ -88,6 +103,20 @@ with open(sys.argv[1], 'rb') as csvfile:
                 row['Exposure (mol-yrs)'] != ''):
                 halflife_vs_exposure[isotope].append((float(row['Exposure (mol-yrs)']),
                                                       float(row['T_{1/2} limit (yrs)'])))
+
+            # Mass vs year (for each set of matrix elements).
+            if (row['Isotope'] in mbb_vs_year_rqrpa and
+                row['m_{bb} limit, ME from Ref 1 (eV)'] != ''):
+                mbb_vs_year_rqrpa[isotope].append((PublicationTime,
+                                                   float(row['m_{bb} limit, ME from Ref 1 (eV)'])))
+            if (row['Isotope'] in mbb_vs_year_ibm2 and
+                row['m_{bb} limit, ME & PS from Ref 2 (eV)'] != ''):
+                mbb_vs_year_ibm2[isotope].append((PublicationTime,
+                                                  float(row['m_{bb} limit, ME & PS from Ref 2 (eV)'])))
+            if (row['Isotope'] in mbb_vs_year_shell and
+                row['m_{bb} limit, ME (Ref 3), PS (Ref 2) (ev)'] != ''):
+                mbb_vs_year_shell[isotope].append((PublicationTime,
+                                                   float(row['m_{bb} limit, ME (Ref 3), PS (Ref 2) (ev)'])))
 
             # Accumulate list of top limits
             if (row['Isotope'] not in ListOfIsotopes or
@@ -122,7 +151,9 @@ def PrettyIsotope(isotope):
 def DrawGraph(xvarlabel, yvarlabel, datapoints, legend_pos, image_name,
               xaxisrange = None, yaxisrange = None, xtype = 'Lin', ytype = 'Log'):
     if xtype == 'Log': c.SetLogx()
+    else: c.SetLogx(0)
     if ytype == 'Log': c.SetLogy()
+    else: c.SetLogy(0)
     c.SetGridy()
     c.SetLeftMargin(0.1)
     c.SetBottomMargin(0.15)
@@ -195,6 +226,27 @@ DrawGraph("Exposure (mol-years)",
           xaxisrange = (3e-1, 1e3),
           yaxisrange = (1e22, 1e26),
           xtype = 'Log')
+
+DrawGraph("Publication Year",
+          "Mass Limit under RQRPA (eV)",
+          mbb_vs_year_rqrpa,
+          (0.7, 0.6, 0.9, 0.8),
+          "mass_vs_year_rqrpa.pdf",
+          yaxisrange = (1e-1, 1e3))
+
+DrawGraph("Publication Year",
+          "Mass Limit under IBM2 (eV)",
+          mbb_vs_year_ibm2,
+          (0.7, 0.6, 0.9, 0.8),
+          "mass_vs_year_ibm2.pdf",
+          yaxisrange = (1e-1, 1e3))
+
+DrawGraph("Publication Year",
+          "Mass Limit under the Shell Model (eV)",
+          mbb_vs_year_shell,
+          (0.7, 0.6, 0.9, 0.8),
+          "mass_vs_year_shell.pdf",
+          yaxisrange = (1e-1, 1e3))
 
 print "The best limits obtained are:"
 for key in ListOfIsotopes:
